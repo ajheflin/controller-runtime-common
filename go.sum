@@ -1,7 +1,7 @@
 github.com/Masterminds/semver/v3 v3.4.0 h1:Zog+i5UMtVoCU8oKka5P7i9q9HgrJeGzI9SA1Xbatp0=
 github.com/Masterminds/semver/v3 v3.4.0/go.mod h1:4V+yj/TJE1HU9XfppCwVMZq3I84lprf4nC11bSS5beM=
-github.com/ajheflin/library-go v0.0.0-20261102185247-cb2648c9e9f4 h1:nnIaga87WvRfUfYDF2PLGC9Mx2bRWzf5eZWJUf/yP24=
-github.com/ajheflin/library-go v0.0.0-20261102185247-cb2648c9e9f4/go.mod h1:jnC7fncyNlp9wu20ElexbQvZBnXXZ7NbejCOvU7UqWU=
+github.com/ajheflin/library-go v0.0.0-20261102190155-6b0ec75dc683 h1:uytyBeYoZLFe/v7d4XtBY6MLE8dCZGDifBm4cxDzKv4=
+github.com/ajheflin/library-go v0.0.0-20261102190155-6b0ec75dc683/go.mod h1:jnC7fncyNlp9wu20ElexbQvZBnXXZ7NbejCOvU7UqWU=
 github.com/beorn7/perks v1.0.1 h1:VlbKKnNfV8bJzeqoa4cOKqO6bYr3WgKZxO8Z16+hsOM=
 github.com/beorn7/perks v1.0.1/go.mod h1:G2ZrVWU2WbWT9wwq4/hrbKbnv/1ERSJQ0ibhJ6rlkpw=
 github.com/cespare/xxhash/v2 v2.3.0 h1:UL815xU9SqsFlibzuggzjXhog7bL6oX9BbNZnL2UFvs=
