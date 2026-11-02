@@ -191,6 +191,70 @@ var _ = Describe("cipherCodes", func() {
 })
 
 var _ = Describe("NewTLSConfigFromProfile", func() {
+	Context("when the profile specifies TLS groups", func() {
+		for name, tc := range map[string]struct {
+			groups      []configv1.TLSGroup
+			curves      []tls.CurveID
+			unsupported []string
+			minVersion  configv1.TLSProtocolVersion
+		}{
+			"applies NIST-only groups in profile order": {
+				groups: []configv1.TLSGroup{
+					configv1.TLSGroupSecP384r1, configv1.TLSGroupSecP256r1, configv1.TLSGroupSecP521r1,
+				},
+				curves: []tls.CurveID{tls.CurveP384, tls.CurveP256, tls.CurveP521},
+			},
+			"applies hybrid groups with TLS 1.3": {
+				groups:     []configv1.TLSGroup{configv1.TLSGroupX25519MLKEM768},
+				curves:     []tls.CurveID{tls.X25519MLKEM768},
+				minVersion: configv1.VersionTLS13,
+			},
+			"skips and returns unsupported groups": {
+				groups:      []configv1.TLSGroup{"unknown-group", configv1.TLSGroupSecP256r1},
+				curves:      []tls.CurveID{tls.CurveP256},
+				unsupported: []string{"unknown-group"},
+			},
+			"skips groups requiring Go 1.26": {
+				groups: []configv1.TLSGroup{
+					configv1.TLSGroupSecP256r1MLKEM768,
+					configv1.TLSGroupSecP384r1,
+					configv1.TLSGroupSecP384r1MLKEM1024,
+				},
+				curves:      []tls.CurveID{tls.CurveP384},
+				unsupported: []string{"SecP256r1MLKEM768", "SecP384r1MLKEM1024"},
+			},
+			"leaves Go defaults when groups are unset": {},
+			"leaves Go defaults when groups are empty": {groups: []configv1.TLSGroup{}},
+		} {
+			It(name, func() {
+				minVersion := tc.minVersion
+				if minVersion == "" {
+					minVersion = configv1.VersionTLS12
+				}
+				profile := configv1.TLSProfileSpec{MinTLSVersion: minVersion, Groups: tc.groups}
+				configure, unsupported := NewTLSConfigFromProfile(profile)
+				Expect(unsupported).To(Equal(tc.unsupported))
+
+				conf := &tls.Config{ClientAuth: tls.RequireAndVerifyClientCert}
+				configure(conf)
+				Expect(conf.CurvePreferences).To(Equal(tc.curves))
+				Expect(conf.ClientAuth).To(Equal(tls.RequireAndVerifyClientCert))
+			})
+		}
+
+		It("returns unsupported ciphers and groups together", func() {
+			configure, unsupported := NewTLSConfigFromProfile(configv1.TLSProfileSpec{
+				MinTLSVersion: configv1.VersionTLS12,
+				Ciphers:       []string{"unknown-cipher"},
+				Groups:        []configv1.TLSGroup{"unknown-group", configv1.TLSGroupSecP256r1},
+			})
+			Expect(unsupported).To(Equal([]string{"unknown-cipher", "unknown-group"}))
+			conf := &tls.Config{}
+			configure(conf)
+			Expect(conf.CurvePreferences).To(Equal([]tls.CurveID{tls.CurveP256}))
+		})
+	})
+
 	Context("when MinTLSVersion is TLS 1.2", func() {
 		It("should set MinVersion and CipherSuites", func() {
 			profile := configv1.TLSProfileSpec{
